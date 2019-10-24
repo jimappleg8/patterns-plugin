@@ -1,0 +1,144 @@
+.current {
+  color: green;
+}
+
+blockquote {
+  margin:0 4em;
+}
+
+.pager {
+  width:900px;
+  padding:0 0 20px 0;
+  margin:0 auto 0 auto;
+/*  border-bottom:1px solid #666; */
+/*  background-color:#CCC; */
+}
+
+#container {
+}
+
+#toc {
+  width:700px;
+  margin:0 auto 0 auto;
+}
+#toc p, #toc p.group {
+  font-style:normal;
+}
+#toc p.section {
+  font-style:italic;
+  font-size:120%;
+  line-height:1.5em;
+}
+#toc li {
+  list-style-type:none;
+}
+
+article {
+  width:900px;
+  margin:20px auto 40px auto;
+  padding:0;
+  font-size:1.2em;
+  line-height:1.7em;
+}
+article h1 {
+  color:#333;
+  font-weight:normal;
+  margin:1.5em 0; 
+  padding:0;
+  text-align:center;
+  text-transform:lowercase !important;
+  font-variant:small-caps !important;
+}
+article h1 span.num {
+  padding-right:12px;
+}
+
+.context {
+  font-style:italic;
+}
+.context p:before {
+  content:"...";
+  letter-spacing:+6px;
+  }
+
+.pattern {
+  text-align:center;
+  padding:12px 0 2px 0;
+}
+
+.problem {
+  text-align:left;
+  font-weight:bold;
+/*  text-indent:18px; */
+  margin-bottom:2em;
+}
+.problem:before {
+  content:url('images/divider.gif');
+  position:relative;
+  padding-left:367px;
+  top:-12px;
+}
+
+.discussion {
+  text-align:left;
+  line-height:1.7em;
+}
+.discussion p {
+/*  text-indent:18px; */
+  margin-top:0;
+  margin-bottom:1em;
+}
+.discussion ul {
+  list-style-image:url('images/diamond.gif');
+  padding:0 0 0 36px; 
+  margin:8px 0 12px 0;
+}
+.discussion li {
+  padding:0;
+  margin:0;
+}
+.discussion li p {
+  margin-left:0;
+  margin-right:0;
+}
+
+.solution {
+  text-align:left;
+  font-weight:bold;
+/*  text-indent:18px; */
+  margin-top:1.5em;
+}
+.solution:after {
+  content:url('images/divider.gif');
+  padding-left:367px;
+}
+
+.posttext {
+  font-style:italic;
+/*  text-indent:18px; */
+}
+.posttext p:after {
+  content:"...";
+  letter-spacing:+6px;
+  padding-left:5px;
+}
+
+.pattern-name {
+  text-transform:lowercase;
+  font-variant:small-caps;
+  font-style:normal;
+}
+
+.editor {
+  padding:2px 6px;
+  color:#F00;
+}
+
+#footer {
+  margin:20px 0 60px 0;
+  padding-top:4px;
+  border-top:1px solid #999; 
+  text-align:center;
+  font-size:0.9em;
+}
+
