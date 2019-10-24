@@ -6,7 +6,76 @@
  */
 class patterns_type
 {
-   public $_fields = array(
+   public $_mandatory_fields = array(
+      'context' => array(
+         'id' => 'context', 
+         'label' => 'Context',
+         'allow_tags' => TRUE,
+         'control' => 'textarea',
+      ),
+      'problem' => array(
+         'id' => 'problem', 
+         'label' => 'Problem',
+         'allow_tags' => TRUE,
+         'control' => 'textarea',
+      ),
+      'forces' => array(
+         'id' => 'forces', 
+         'label' => 'Forces',
+         'allow_tags' => TRUE,
+         'control' => 'textarea',
+      ),
+      'solution' => array(
+         'id' => 'solution', 
+         'label' => 'Solution',
+         'allow_tags' => TRUE,
+         'control' => 'textarea',
+      ),
+   );
+   
+   public $_optional_fields = array(
+      'rationale' => array(
+         'id' => 'rationale', 
+         'label' => 'Rationale',
+         'allow_tags' => TRUE,
+         'control' => 'textarea',
+      ),
+      'indications' => array(
+         'id' => 'indications', 
+         'label' => 'Indications',
+         'allow_tags' => TRUE,
+         'control' => 'textarea',
+      ),
+      'resulting_context' => array(
+         'id' => 'resulting_context', 
+         'label' => 'Resulting Context',
+         'allow_tags' => TRUE,
+         'control' => 'textarea',
+      ),
+      'related_patterns' => array(
+         'id' => 'related_patterns', 
+         'label' => 'Related Patterns',
+         'allow_tags' => TRUE,
+         'control' => 'textarea',
+      ),
+      'examples' => array(
+         'id' => 'examples', 
+         'label' => 'Examples',
+         'allow_tags' => TRUE,
+         'control' => 'textarea',
+      ),
+      'aliases' => array(
+         'id' => 'aliases', 
+         'label' => 'Aliases',
+         'allow_tags' => TRUE,
+         'control' => 'textarea',
+      ),
+      'acknowledgements' => array(
+         'id' => 'acknowledgements', 
+         'label' => 'Acknowledgements',
+         'allow_tags' => TRUE,
+         'control' => 'textarea',
+      ),
       'pattern_num' => array(
          'id' => 'pattern_num',
          'label' => 'Pattern Number',
@@ -25,25 +94,8 @@ class patterns_type
             array('value' => 'high', 'text' => '***'),
          ),
       ),
-      'context' => array(
-         'id' => 'context', 
-         'label' => 'Context',
-         'allow_tags' => TRUE,
-         'control' => 'textarea',
-      ),
-      'rationale' => array(
-         'id' => 'rationale', 
-         'label' => 'Rationale',
-         'allow_tags' => TRUE,
-         'control' => 'textarea',
-      ),
-      'solution' => array(
-         'id' => 'solution', 
-         'label' => 'Solution',
-         'allow_tags' => TRUE,
-         'control' => 'textarea',
-      ),
    );
+
 
    // ------------------------------------------------------------
 
@@ -55,6 +107,7 @@ class patterns_type
       // register actions
       add_action('init', array(&$this, 'init'), 0);
       add_action('admin_init', array(&$this, 'admin_init'));
+      add_action('save_post', array(&$this, 'save_pattern'));
    }
 
    // ------------------------------------------------------------
@@ -66,7 +119,6 @@ class patterns_type
    {
       // Initialize Post Type
       $this->create_post_type();
-      add_action('save_post', array(&$this, 'save_post'));
    }
 
    // ------------------------------------------------------------
@@ -126,7 +178,7 @@ class patterns_type
          'labels' => $labels,
          'hierarchical' => false,
          'description' => 'Patterns',
-         'supports' => array('title', 'editor', 'thumbnail'),
+         'supports' => array('title', 'thumbnail'),
          'public' => true,
          'show_ui' => true,
          'show_in_menu' => true,
@@ -150,32 +202,51 @@ class patterns_type
    /**
     * Save the metaboxes for this custom post type
     */
-   public function save_post($post_id)
+   public function save_pattern($post_id)
    {
-      // verify if this is an auto save routine. 
-      // If it is our form has not been submitted, so we dont want to do anything
-      if (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE)
-      {
-         return;
-      }
-      
-      // check that the form is being submitted legitimately
-      if ( ! wp_verify_nonce($_POST['patterns_nonce'], plugin_basename( __FILE__ )))
-      {
-         return;
-      }
+      /*
+       * We need to verify this came from the our screen and with proper authorization,
+       * because save_post can be triggered at other times.
+       */
 
-      if (isset($_POST['post_type']) && $_POST['post_type'] == 'patterns' && current_user_can('edit_post', $post_id))
-      {
-         foreach ($this->_fields as $field_name)
-         {
-            // Update the post's meta field
-            update_post_meta($post_id, $field_name['id'], $_POST[$field_name]);
+      // Check if our nonce is set.
+      if ( ! isset( $_POST['patterns_meta_boxes_nonce'] ) ) {
+         return $post_id;
+      }
+ 
+      $nonce = $_POST['patterns_meta_boxes_nonce'];
+ 
+      // Verify that the nonce is valid.
+      if ( ! wp_verify_nonce( $nonce, 'patterns_meta_boxes' ) ) {
+         return $post_id;
+      }
+ 
+      /*
+       * If this is an autosave, our form has not been submitted,
+       * so we don't want to do anything.
+       */
+      if ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) {
+         return $post_id;
+      }
+ 
+      // Check the user's permissions.
+      if ( 'patterns' == $_POST['post_type'] ) {
+         if ( ! current_user_can( 'edit_post', $post_id ) ) {
+            return $post_id;
          }
       }
-      else
+ 
+      /* OK, it's safe for us to save the data now. */ 
+      
+      foreach ($this->_mandatory_fields as $field_name)
       {
-         return;
+         // Update the meta field.
+         update_post_meta( $post_id, $field_name['id'], $_POST[$field_name['id']] );
+      }
+      foreach ($this->_optional_fields as $field_name)
+      {
+         // Update the meta field.
+         update_post_meta( $post_id, $field_name['id'], $_POST[$field_name['id']] );
       }
    }
 
@@ -197,17 +268,25 @@ class patterns_type
     */
    public function add_meta_boxes()
    {
-      global $post;
-      
-      $patternData = array();
-      foreach ($this->_fields as $field_name)
-      {
-         $patternData[$field_name['id']] = get_post_meta($post->ID, $field_name['id'], true);
-      }
+      // Add mandatory elements
+      add_meta_box(
+         'meta_box_mandatory_fields', 
+         'Mandatory Elements', 
+         array(&$this, 'meta_box_mandatory_fields_content'), 
+         'patterns', 
+         'normal', 
+         'high', 
+      );
 
-      add_meta_box('meta_box_api_fields', 'Patterns', array(&$this, 'meta_box_api_fields_content'), 'patterns', 'normal', 'default', $patternData);
-
-      add_filter("postbox_classes_patterns_meta_box_api_fields", array(&$this, 'minify_metabox'));
+     // Add optional elements
+      add_meta_box(
+         'meta_box_optional_fields', 
+         'Optional Elements', 
+         array(&$this, 'meta_box_optional_fields_content'), 
+         'patterns', 
+         'normal', 
+         'default', 
+      );
    }
 
    // ------------------------------------------------------------
@@ -215,19 +294,56 @@ class patterns_type
    /*
     * Callback for add_meta_box() in $this->add_meta_boxes()
     */
-   function meta_box_api_fields_content($post, $args)
+   function meta_box_mandatory_fields_content($post)
    {
-      wp_nonce_field(plugin_basename( __FILE__ ), 'patterns_nonce' );
+      wp_nonce_field('patterns_meta_boxes', 'patterns_meta_boxes_nonce' );
 
-      foreach ($this->_fields as $field_name)
+      foreach ($this->_mandatory_fields as $field_name)
       {
-            $data = null;
-            if ($field_name['control'] == 'select')
-            {
-               $data = $field_name['options'];
-            }
-            echo patterns_get_control($field_name['control'], $field_name['label'], 'patterns_settings_'.$field_name['id'], $field_name['id'], ((isset($args['args'][$field_name['id']]))?$args['args'][$field_name['id']]:''), $data);
+         $data = null;
+         if ($field_name['control'] == 'select')
+         {
+            $data = $field_name['options'];
          }
+         // Use get_post_meta to retrieve an existing value from the database.
+         $value = get_post_meta( $post->ID, $field_name['id'], true );
+         echo patterns_get_control(
+            $field_name['control'],
+            $field_name['label'],
+            'patterns_settings_'.$field_name['id'],
+            $field_name['id'],
+            $value,
+            $data
+         );
+      }
    }
+
+   // ------------------------------------------------------------
+   
+   /*
+    * Callback for add_meta_box() in $this->add_meta_boxes()
+    */
+   function meta_box_optional_fields_content($post, $args)
+   {
+      foreach ($this->_optional_fields as $field_name)
+      {
+         $data = null;
+         if ($field_name['control'] == 'select')
+         {
+            $data = $field_name['options'];
+         }
+         // Use get_post_meta to retrieve an existing value from the database.
+         $value = get_post_meta( $post->ID, $field_name['id'], true );
+         echo patterns_get_control(
+            $field_name['control'],
+            $field_name['label'],
+            'patterns_settings_'.$field_name['id'],
+            $field_name['id'],
+            $value,
+            $data
+         );
+      }
+   }
+
 
 } // END class PostTypeTemplate

@@ -2,12 +2,12 @@
 /**
  * @package Patterns
  * @author Jim Applegate <jimappleg8@gmail.com>
- * @version 1.0
+ * @version 0.1beta
  */
 /*
 Plugin Name: Patterns
-Plugin URI: https://github.com
-Description: A plugin to implement patterns in Wordpress.
+Plugin URI: https://github.com/jimappleg8/patterns-plugin
+Description: A plugin to implement pattern languages and patterns in Wordpress.
 Version: 0.1beta
 Author: Jim Applegate
 Author URI: https://www.jimapplegate.com/

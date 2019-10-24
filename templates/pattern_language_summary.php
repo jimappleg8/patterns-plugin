@@ -65,5 +65,5 @@ function hierarchical_group_tree( $cat )
 <h2><?php echo $group[0]->name; ?></h2>
 <p><?php echo $group[0]->description; ?></h2>
 
-<?php hierarchical_category_tree( $root_id ); ?>
+<?php hierarchical_group_tree( $root_id ); ?>
 
