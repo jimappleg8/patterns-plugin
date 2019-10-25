@@ -126,7 +126,7 @@ class patterns_plugin {
       add_action('wp_before_admin_bar_render', array(&$this, 'remove_admin_bar_links'));
       
       // Hides the "Add New" buttons in the admin headings
-      add_action('admin_head', array(&$this, 'remove_admin_head_links'));
+//      add_action('admin_head', array(&$this, 'remove_admin_head_links'));
       
       // Adds a settings link to the Plugins install page
       add_filter('plugin_action_links', array(&$this, 'plugin_action_links'), 10, 2);
@@ -160,7 +160,6 @@ class patterns_plugin {
       add_option('patterns_alias_category', '1');
       add_option('patterns_db_version', PATTERNS_DB_VERSION_NUM);
       add_option('patterns_restrict_to_categories', '');
-      add_option('patterns_templates', '1');
       add_option('patterns_use_groups', '1');
       add_option('patterns_version', PATTERNS_VERSION_NUM);
       
@@ -196,7 +195,6 @@ class patterns_plugin {
       delete_option('patterns_alias_category');
       delete_option('patterns_db_version');
       delete_option('patterns_restrict_to_categories');
-      delete_option('patterns_templates');
       delete_option('patterns_use_groups');
       delete_option('patterns_version');
       delete_option('patterns-categories_children');
@@ -311,48 +309,77 @@ class patterns_plugin {
    // ------------------------------------------------------------
 
    /**
-    * Checks if a template is available in the theme and uses the default
-    *  if it is not.
+    * Set template
+    *
+    * This is a filter for the WP template_include() function
+    *
+    * Checks if WP is loading a template for a patterns post
+    * type and will try to load the template from the correct
+    * directory. It uses locate_template to determine if there
+    * is a copy of the template in the themes folder.
     *
     */   
-   public function set_template($template)
+   public function set_template( $template )
    {
-      // has template handling been turned off?
-      if (get_option('patterns_templates', '1') != '1')
-      {
-         return $template;
-      }
+      $file = '';
       
-      $theme_path = get_template_directory().'/patterns';
+      if ( is_singular( 'patterns' ) ) :
+         $file = 'single-patterns.php';
+      endif;
       
-      if (is_singular('pattern') && ! $this->_is_pattern_template($template, 'single'))
-      {
-         $template = $theme_path . '/single-pattern.php';
-      }
-
+      if ( $file ) :
+         if ( file_exists( $this->locate_template( $file ) ) ) :
+            $template = $this->locate_template( $file );
+         endif;
+      endif;
+      
       return $template;
    }
 
    // ------------------------------------------------------------
 
    /**
-    * Checks to see if the template that WordPress has picked from the 
-    *  theme/child-theme is one of ours. If it is, then that means that
-    *  Wordpress found an override template and we should let it use it.
+    * Locate template.
     *
-    */   
-   private function _is_pattern_template($template_path, $context = '')
+    * https://jeroensormani.com/how-to-add-template-files-in-your-plugin/
+    * @author Jeroen Sormani
+    *
+    * Locate the called template.
+    * Search Order:
+    * 1. /themes/theme/patterns/$template_name
+    * 2. /plugins/patterns/templates/$template_name
+    *
+    * @since 1.0.0
+    *
+    * @param    string 	 $template_name         Template to load.
+    * @param    string 	 $template_path         Path to templates.
+    * @param    string	 $default_path          Default path to template files.
+    * @return   string                          Path to the template file.
+    */
+   private function locate_template( $template_name, $template_path = '', $default_path = '' ) 
    {
-      // Get template name
-      $template = basename($template_path);
+      // Set variable to search in woocommerce-plugin-templates folder of theme.
+      if ( ! $template_path ) :
+         $template_path = get_template_directory() . '/patterns/';
+      endif;
 
-      switch ($context)
-      {
-         case 'single':
-            return $template == 'single-patterns.php';
-      }
+      // Set default plugin templates path.
+      if ( ! $default_path ) :
+         $default_path = plugin_dir_path( __FILE__ ) . 'templates/'; // Path to the template folder
+      endif;
 
-      return FALSE;
+      // Search template file in theme folder.
+      $template = locate_template( array(
+         $template_path . $template_name,
+         $template_name
+      ) );
+
+      // Get plugins template file.
+      if ( ! $template ) :
+         $template = $default_path . $template_name;
+      endif;
+
+      return apply_filters( 'patterns_locate_template', $template, $template_name, $template_path, $default_path );
    }
 
    // ------------------------------------------------------------
@@ -369,9 +396,9 @@ class patterns_plugin {
     *
     * @author Jonathan Davis, John Dillick
     *
-    * @param string $src The source directory for the builtin template files
-    * @param string $target The target directory in the active theme
-    * @return void
+    * @param    string  $src    The source directory for the builtin template files
+    * @param    string  $target The target directory in the active theme
+    * @return   void
     */
    public function copy_templates($src, $target)
    {
@@ -469,14 +496,14 @@ class patterns_plugin {
       }
       
       // search existing patterns for the title
-      $pattern = get_page_by_title($content, OBJECT, 'patterns');
+      $pattern = get_page_by_title(trim($content), OBJECT, 'patterns');
       
       if (! $pattern instanceof WP_Post)
       {
-         return '<span style="color:red;">' . $content.' ()</span>';
+         return '<span class="pattern-name" style="color:red;">' . $content.'</span>';
       }
       
-      $link = '<a href="'.get_permalink($pattern).'" class="pattern-name">'.get_the_title($pattern).' ( )</a>';
+      $link = '<a href="'.get_permalink($pattern).'" class="pattern-name">'.get_the_title($pattern).'</a>';
 
       return $link;
    }

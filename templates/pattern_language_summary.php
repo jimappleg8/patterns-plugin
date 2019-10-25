@@ -28,7 +28,7 @@ function hierarchical_group_tree( $cat )
          wp_reset_query();
          
          echo '<h3>' . $group->name . '</h3>';
-         echo '<p>' . $group->description . '</p>';
+         echo '<p class="group">' . $group->description . '</p>';
 
          $args = array(
             'posts_per_page' => -1,
@@ -47,7 +47,7 @@ function hierarchical_group_tree( $cat )
          $loop = new WP_Query($args);
          echo '<ul>';
          while($loop->have_posts()) : $loop->the_post();
-            echo '<li><a href="' . get_permalink() . '" class="pattern-name">' . get_the_title() . ' ( )</a></li>';
+            echo '<li><a href="' . get_permalink() . '" class="pattern-name">' . get_the_title() . '</a></li>';
          endwhile;
          echo '</ul>';
 
@@ -62,8 +62,11 @@ function hierarchical_group_tree( $cat )
 
 ?>
 
+<div id="pattern-language-summary">
+
 <h2><?php echo $group[0]->name; ?></h2>
-<p><?php echo $group[0]->description; ?></h2>
+<p class="section"><?php echo $group[0]->description; ?></h2>
 
 <?php hierarchical_group_tree( $root_id ); ?>
 
+</div>

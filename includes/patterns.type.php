@@ -88,10 +88,10 @@ class patterns_type
          'allow_tags' => FALSE,
          'control' => 'select',
          'options' => array(
-            array('value' => 'none', 'text' => ''),
-            array('value' => 'low', 'text' => '*'),
-            array('value' => 'medium', 'text' => '**'),
-            array('value' => 'high', 'text' => '***'),
+            array('value' => '', 'text' => ''),
+            array('value' => '*', 'text' => '*'),
+            array('value' => '**', 'text' => '**'),
+            array('value' => '***', 'text' => '***'),
          ),
       ),
    );
