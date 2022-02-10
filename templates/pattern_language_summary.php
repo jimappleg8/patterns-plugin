@@ -27,8 +27,7 @@ function hierarchical_group_tree( $cat )
 
          wp_reset_query();
          
-         echo '<h3>' . $group->name . '</h3>';
-         echo '<p class="group">' . $group->description . '</p>';
+         echo '<p class="group"><strong>' . $group->name . ':</strong> ' . $group->description . '</p>';
 
          $args = array(
             'posts_per_page' => -1,
